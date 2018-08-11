@@ -1,0 +1,26 @@
+{
+  "name": "radarchart",
+  "version": "1.0.0",
+  "description": "Radarchart based in D3.js",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "d3": "^5.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yvescavalcanti/radarchart.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yvescavalcanti/radarchart/issues"
+  },
+  "homepage": "https://github.com/yvescavalcanti/radarchart#readme"
+}
