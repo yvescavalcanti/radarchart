@@ -1,3 +1,4 @@
+/* converte graus em radianos */
 function radians(angle){
 	return angle * (Math.PI / 180);
 }
@@ -14,6 +15,7 @@ function _y(radio){
 	};	
 }
 
+/* Função que retorna função geradora de eixos radiais */
 function radialAxes(){
 	var keys = [];
 	var radio = 0;
