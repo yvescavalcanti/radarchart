@@ -8,6 +8,11 @@
 .entity{
 	opacity:0.3;
 }
+.level{
+	fill:none;
+	stroke:#ccc;
+	stroke-width:1px;
+}
 </style>
 <script type="text/javascript" src="../node_modules/d3/dist/d3.min.js"></script>
 <script type="text/javascript" src="../src/radial-axes.js"></script>
@@ -53,7 +58,7 @@ var axesFactory = radialAxes()
 
 var axes = axesFactory(sample);
 
-var radar = Radar().data(sample).axes(axes).center({x:150,y:150});
+var radar = Radar().radio(150).data(sample).axes(axes).center({x:150,y:150});
 
 d3.select("#chart").call(radar);
 
@@ -62,7 +67,7 @@ var axesFactory2 = radialAxes()
 
 var axes2 = axesFactory2(sample);
 
-var radar2 = Radar().data(sample).axes(axes2).center({x:150,y:150});
+var radar2 = Radar().radio(150).data(sample).axes(axes2).center({x:150,y:150});
 
 d3.select("#chart2").call(radar2);
 
@@ -71,7 +76,7 @@ var axesFactory3 = radialAxes()
 
 var axes3 = axesFactory3(sample);
 
-var radar3 = Radar().data(sample).axes(axes3).center({x:150,y:150});
+var radar3 = Radar().radio(150).data(sample).axes(axes3).center({x:150,y:150});
 
 d3.select("#chart3").call(radar3);
 

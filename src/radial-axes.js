@@ -1,6 +1,6 @@
 
 
-function polarToCartesian(radio, angle, scale){
+function polarToCartesian(radio, angle, scale = null){
 	var _x = Math.cos(radians(angle)); 
 	var _y = Math.sin(radians(angle));
 	//console.log("_x:"+_x);
@@ -11,7 +11,14 @@ function polarToCartesian(radio, angle, scale){
 			y: radio - scale(val)*_y 
 		}; 
 	};
-	return f;
+	var g = function(val){
+		return { 
+			x: radio + val*_x, 
+			y: radio - val*_y 
+		}; 
+	};
+
+	return scale === null ? g : f;
 }
 
 /* converte graus em radianos */
@@ -66,7 +73,6 @@ function radialAxes(){
 	function main(data){
 		// defining angle between axes
 		step = 360 / keys.length;
-		console.log(data);
 		// start angle for the first axes in degrees
 		var aux = 90;
 		var axes = [];
@@ -87,9 +93,11 @@ function radialAxes(){
 				// função para posicionar pontos ao longo do eixo
 				getPoint:function(d)
 					{
-						console.log("aux:"+aux);
 						return (polarToCartesian(radio,this.angle,scale))(d[k]);
-					}
+					},
+				getNonScaledPoint:function(d){
+					return (polarToCartesian(radio,this.angle))(d[k]);
+				}
 			});
 			// calcula ângulo do próximo eixo
 			aux+=step;
@@ -101,18 +109,31 @@ function radialAxes(){
 				return a.apex;	
 			});	
 		};
-		
+		axes.keys = function(){
+			return this.map(function(a){
+				return a.key;	
+			});	
+		};
+
 		axes.getPoints = function(d){
-		var p = [];
-		axes.forEach(function(a){
-			p.push(
-				a.getPoint(d)
-			);
-		});
-		return p;
-		
-	}
+			var p = [];
+			axes.forEach(function(a){
+				p.push(
+					a.getPoint(d)
+				);
+			});
+			return p;
+		}
 	
+		axes.getNonScaledPoints = function(d){
+			var p = [];
+			axes.forEach(function(a){
+				p.push(
+					a.getNonScaledPoint(d)
+				);
+			});
+			return p;
+		}
 	
 		return axes;
 	}
