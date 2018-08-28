@@ -7,10 +7,7 @@ function Radar(){
 	var color = d3.schemeCategory10;
 	var n_levels = 5;
 	var opacity = d3.scaleLinear().range([0.8,0.4]);
-	var dataArea, back;
-	var svg;
 	function main(selection){
-		var self = this;
 		var levels = [];
 		var step = radio/n_levels;
 		var dist = radio;
@@ -23,19 +20,18 @@ function Radar(){
 			levels.push(aux);
 		}
 
-
 		selection.each(function(){
 			
 			var el = d3.select(this);
-			if(svg === undefined)
-			svg = el.append('svg').attr('width',400)
+			var svg = d3.select('#chart').append('svg').attr('width',400)
 			.attr('height',400);
-			if(back === undefined){
-				back = svg.append('g').attr('transform', function(d){
-					return "translate("+margin.left+","+margin.top+")";
-				});
-
-				back.selectAll('.level').data(levels).enter()
+			var back = svg.append('g').attr('transform', function(d){
+				return "translate("+margin.left+","+margin.top+")";
+			});
+			var g = svg.append('g').attr('transform', function(d){
+				return "translate("+margin.left+","+margin.top+")";
+			});
+			back.selectAll('.level').data(levels).enter()
 				.append('polygon').attr('class','level')
 				.attr('points', function(d){
 						//console.log(d);
@@ -44,66 +40,56 @@ function Radar(){
 						return points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
 				});
 
-				var gAxes = back.selectAll('.axes').data(axes, function(d){return d.id;})
-				.enter();
-				// adicionando legenda dos eixos
-				gAxes.append("text").attr("class","axis-text")
-				.text(function(d){return d.label;})
-				.attr('x', function(d){return d.apex.x;}).attr('y',function(d){return d.apex.y;})
-				.classed('anchor-end', function(d){
-					//console.log(Math.round(d.apex.x));
-					if(Math.round(d.apex.x) < radio)
-						return true;
-					else
-						return false;
-					
-				})
-				.classed('anchor-start', function(d){
-					//console.log(Math.round(d.apex.x));
-					if(Math.round(d.apex.x) > radio)
-						return true;
-					else
-						return false;
-					
-				})
-				.attr('dy',function(d){
-					if(Math.round(d.apex.y)>radio)
-						return 10;
-				});
+			var gAxes = back.selectAll('.axes').data(axes, function(d){return d.id;}).enter().
+			append('g');
+			// adicionando legenda dos eixos
+			gAxes.append("text").attr("class","axis-text")
+			.text(function(d){return d.label;})
+			.attr('x', function(d){return d.apex.x;}).attr('y',function(d){return d.apex.y;})
+			.classed('anchor-end', function(d){
+				//console.log(Math.round(d.apex.x));
+				if(Math.round(d.apex.x) < radio)
+					return true;
+				else
+					return false;
+				
+			})
+			.classed('anchor-start', function(d){
+				//console.log(Math.round(d.apex.x));
+				if(Math.round(d.apex.x) > radio)
+					return true;
+				else
+					return false;
+				
+			})
+			.attr('dy',function(d){
+				if(Math.round(d.apex.y)>radio)
+					return 10;
+			});
 
-				gAxes.append('line')
-				.attr('x1',center.x).attr('y1',center.y)
-				.attr('x2',function(d){return d.apex.x;})
-				.attr('y2',function(d){return d.apex.y;})
-				.attr('fill','none').attr('class','axis')
-				.on("mouseover",function(d){
-					d3.select(this).classed("axis-hover", true);
-				})
-				.on("mouseout",function(){
-					d3.select(this).classed("axis-hover", false);
-				});
-			}
-
-			if(dataArea === undefined)
-			dataArea = svg.append('g').attr('transform', function(d){
-				return "translate("+margin.left+","+margin.top+")";
+			gAxes.append('line')
+			.attr('x1',center.x).attr('y1',center.y)
+			.attr('x2',function(d){return d.apex.x;})
+			.attr('y2',function(d){return d.apex.y;})
+			.attr('fill','none').attr('class','axis')
+			.on("mouseover",function(d){
+				d3.select(this).classed("axis-hover", true);
+			})
+			.on("mouseout",function(){
+				d3.select(this).classed("axis-hover", false);
 			});
 			
-		
 			opacity = opacity.domain([0,dados.length]);
 			var id = 0;
-			var enterData = dataArea.selectAll('.entity')
+			var enterData = g.selectAll('.entity')
 			.data(dados, function(d){
 				d.points = axes.getPoints(d);
-				return d.id || (d.id = ++id);
-			});
-			console.log(enterData);
+				return d.id ? (id = d.id+1, d.id) : (d.id = id++, d.id);
+			}).enter();
 			
-			var polygons = enterData.enter().append('polygon').attr('fill',function(d,i){
-					//console.log(d);
+			enterData.append('polygon').attr('fill',function(d,i){
 					return color[i];
 				})
-				.attr('class','entity')
 				.attr('stroke',function(d,i){
 					return color[i];
 				})
@@ -118,8 +104,7 @@ function Radar(){
 						return d.points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
 			}).on("mouseover",function(d){
 				var el = d3.select(this).attr('stroke','black');
-				console.log(self);
-				dataArea.selectAll('.points').data(d.points).enter().append('text')
+				g.selectAll('.points').data(d.points).enter().append('text')
 				.attr('class','points')
 				.attr('x',function(d){return d.x;})
 				.attr('y',function(d){return d.y;})
@@ -143,15 +128,9 @@ function Radar(){
 			})
 			.on("mouseout",function(d,i){
 				d3.select(this).attr('stroke',color[i]);
-				dataArea.selectAll('.points').remove();
+				g.selectAll('.points').remove();
 			});
-			polygons.merge(enterData).transition().duration(2000)
-			.attr('points',
-				function(d){
-					//var points = axes.getNonScaledPoints(d);
-					//console.log(points);
-					return d.points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
-				});
+				
 
 		});
 		
@@ -177,18 +156,11 @@ function Radar(){
 	main.margin = function(_)
 	{
 		return arguments.length ? (margin=_, main) : margin;
-	}
-
-	main.pushEntity = function(e){
-		dados.push(e);
-		this.teste();
-		return main;
-	}
-
-	main.teste = function(){
-		console.log("teste");
-		return main;
-	}
+    }
+    
+    main.pushEntity = function(e){
+    
+    }
 
 	return main;
 }

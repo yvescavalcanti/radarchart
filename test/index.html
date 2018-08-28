@@ -2,16 +2,39 @@
 <head>
 <meta charset="utf-8"/>
 <style>
+	div{
+		display: inline;
+	}
 	svg{
 	border:1px red dotted;
 }
 .entity{
-	opacity:0.3;
+	opacity:0.8;
 }
 .level{
 	fill:none;
 	stroke:#ccc;
+	stroke-width:0.5px;
+}
+
+.axis{
 	stroke-width:1px;
+	stroke:#ccc;
+}
+
+.axis-hover{
+	stroke:yellow;
+}
+.axis-text{
+	fill:red;
+	font: 10px sans-serif;
+	text-anchor: middle;
+}
+.anchor-end{
+	text-anchor: end;
+}
+.anchor-start{
+	text-anchor: start;
 }
 </style>
 <script type="text/javascript" src="../node_modules/d3/dist/d3.min.js"></script>
@@ -25,60 +48,76 @@
 <div id="chart3"></div>
 </body>
 <script>
-var sample = [
-{
-	forca:110,
-	velocidade:150,
-	resistencia: 80,
-	preco: 230,
-	peso:1000
-},
-{
-	forca:150,
-	velocidade:100,
-	resistencia: 180,
-	preco: 330,
-	peso:1500,
-},
-{
-	forca:100,
-	velocidade:250,
-	resistencia: 380,
-	preco: 275,
-	peso: 950
-}
-];
 
+
+var sample2 = [
+{
+	forca:{value:110,scaled:30},
+	velocidade:{value:1050,scaled:95},
+	resistencia: {value:80,scaled:40},
+	preco:{value:230, scaled:70},
+	peso:{value:1000, scaled:50}
+},
+{
+	forca:{value:110,scaled:70},
+	velocidade:{value:100,scaled:5},
+	resistencia: {value:180,scaled:43},
+	preco:{value:30, scaled:10},
+	peso:{value:1100, scaled:90}
+},
+{
+	forca:{value:110,scaled:25},
+	velocidade:{value:100,scaled:50},
+	resistencia: {value:180,scaled:93},
+	preco:{value:30, scaled:10},
+	peso:{value:1100, scaled:25}
+}
+
+];
 var width=400, height=400;
 var raio = width < height ? width/2 : height / 2;
+var margin = {left:50,top:50};
 
+var labels = ["força", "velocidade", "resistência", "preço", "peso"];
+var axesFactory = radialAxes().labels(labels)
+	.keys(['forca','velocidade','resistencia','preco','peso']).radio(150);
 
-var axesFactory = radialAxes()
-	.keys(['forca','velocidade','resistencia','preco']).radio(150);
+var axes = axesFactory(sample2);
 
-var axes = axesFactory(sample);
+var radar = Radar().radio(150).margin(margin).data(sample2).axes(axes).center({x:150,y:150});
 
-var radar = Radar().radio(150).data(sample).axes(axes).center({x:150,y:150});
+var r1 = d3.select("#chart").call(radar);
 
-d3.select("#chart").call(radar);
-
-var axesFactory2 = radialAxes()
+labels = ["força", "velocidade", "preço"];
+var axesFactory2 = radialAxes().labels(labels)
 	.keys(['forca','velocidade','preco']).radio(150);
 
-var axes2 = axesFactory2(sample);
+var axes2 = axesFactory2(sample2);
 
-var radar2 = Radar().radio(150).data(sample).axes(axes2).center({x:150,y:150});
+var radar2 = Radar().radio(150).margin(margin).data(sample2).axes(axes2).center({x:150,y:150});
 
-d3.select("#chart2").call(radar2);
+var r2 = d3.select("#chart2").call(radar2);
 
-var axesFactory3 = radialAxes()
-	.keys(['forca','velocidade','preco','resistencia','peso']).radio(150);
+sample2[0].velocidade.scaled = 9;
+sample2[0].forca.scaled = 89;
+sample2[1].peso.scaled = 9;
+sample2[1].velocidade.scaled = 75;
+sample2[2].preco.scaled = 97;
+radar.data(sample2);
+r1.call(radar);
+radar2.data(sample2);
+r2.call(radar2);
+
+/*
+labels = ["força", "velocidade", "resistência", "preço", "peso"];
+var axesFactory3 = radialAxes().labels(labels)
+	.keys(['forcaScaled','velocidadeScaled','precoScaled','resistenciaScaled','pesoScaled']).radio(150);
 
 var axes3 = axesFactory3(sample);
 
-var radar3 = Radar().radio(150).data(sample).axes(axes3).center({x:150,y:150});
+var radar3 = Radar().radio(150).margin(margin).data(sample).axes(axes3).center({x:150,y:150});
 
 d3.select("#chart3").call(radar3);
-
+*/
 </script>
 </html>

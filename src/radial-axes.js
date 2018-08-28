@@ -65,6 +65,7 @@ function getAxesMin(key,data)
 /* Função que retorna função geradora de eixos radiais */
 function radialAxes(){
 	var keys = [];
+	var labels = [];
 	var radio = 0;
 	var step = 0;
 	var x,y;
@@ -78,7 +79,7 @@ function radialAxes(){
 		var axes = [];
 		keys.forEach(function(k,i){
 			var scale = d3.scaleLinear().range([0,radio])
-				.domain([0 ,getAxesMax(k,data)]);
+				.domain([0 ,100]);// domínio fixo getAxesMax(k,data)]);
 			axes.push({
 				// id para identificação
 				id:i,
@@ -90,10 +91,14 @@ function radialAxes(){
 					x:x(radio, aux),
 					y:y(radio, aux)
 				},
+				label : labels[i],
 				// função para posicionar pontos ao longo do eixo
 				getPoint:function(d)
 					{
-						return (polarToCartesian(radio,this.angle,scale))(d[k]);
+						//return (polarToCartesian(radio,this.angle,scale))(d[k]);
+						var p = (polarToCartesian(radio,this.angle,scale))(d[k].scaled);
+						p.value = d[k].value;
+						return p;
 					},
 				getNonScaledPoint:function(d){
 					return (polarToCartesian(radio,this.angle))(d[k]);
@@ -154,6 +159,10 @@ function radialAxes(){
 
 	main.axes = function(){
 			
+	};
+
+	main.labels = function(_){
+		return (arguments.length) ? (labels = _, main) : labels;
 	};
 
 	return main;
