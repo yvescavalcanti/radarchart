@@ -95,12 +95,12 @@ function Radar(){
 			var enterData = dataArea.selectAll('.entity')
 			.data(dados, function(d){
 				d.points = axes.getPoints(d);
+				
 				return d.id || (d.id = ++id);
 			});
-			console.log(enterData);
+			
 			
 			var polygons = enterData.enter().append('polygon').attr('fill',function(d,i){
-					//console.log(d);
 					return color[i];
 				})
 				.attr('class','entity')
@@ -108,18 +108,25 @@ function Radar(){
 					return color[i];
 				})
 				.attr('opacity',function(d,i){
-					//console.log("opacity:"+opacity(i));
 					return opacity(i);
 				})
 				.attr('stroke-width',"1px")
 				.attr("points", function(d){
-						//console.log(d);
-						//var points = axes.getPoints(d);
-						return d.points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
-			}).on("mouseover",function(d){
+					
+					return d.points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
+			}).on("mouseenter",function(d){
 				var el = d3.select(this).attr('stroke','black');
-				console.log(self);
-				dataArea.selectAll('.points').data(d.points).enter().append('text')
+				var points = axes.getPoints(d);
+				var polygon = points.map(function(el){return [el.x, el.y];});
+				var center = d3.polygonCentroid(polygon);
+				var area = Math.round(d3.polygonArea(polygon)*100)/100;
+				
+				dataArea.selectAll('.centerpoint').data([center]).enter().append('text')
+				.attr('class','centerpoint')
+				.attr('x',function(d){return d[0];})
+				.attr('y',function(d){return d[1];}).text(area)
+				.style('text-anchor','middle');
+				dataArea.selectAll('.points').data(points).enter().append('text')
 				.attr('class','points')
 				.attr('x',function(d){return d.x;})
 				.attr('y',function(d){return d.y;})
@@ -144,6 +151,7 @@ function Radar(){
 			.on("mouseout",function(d,i){
 				d3.select(this).attr('stroke',color[i]);
 				dataArea.selectAll('.points').remove();
+				dataArea.selectAll('.centerpoint').remove();
 			});
 			polygons.merge(enterData).transition().duration(2000)
 			.attr('points',

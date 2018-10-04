@@ -94,7 +94,7 @@ var axesFactory2 = radialAxes().labels(labels)
 
 var axes2 = axesFactory2(sample2);
 
-var radar2 = Radar().radio(150).margin(margin).data(sample2).axes(axes2).center({x:150,y:150});
+var radar2 = (new Radar()).radio(150).margin(margin).data(sample2).axes(axes2).center({x:150,y:150});
 
 var r2 = d3.select("#chart2").call(radar2);
 
