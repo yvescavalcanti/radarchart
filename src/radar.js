@@ -9,6 +9,10 @@ function Radar(){
 	var opacity = d3.scaleLinear().range([0.8,0.4]);
 	var dataArea, back;
 	var svg;
+	// define se a área do radar deve ser preenchida
+	var fill = false;
+	// armazena área total
+	var totalArea = -1;
 	function main(selection){
 		var self = this;
 		var levels = [];
@@ -36,14 +40,18 @@ function Radar(){
 				});
 
 				back.selectAll('.level').data(levels).enter()
-				.append('polygon').attr('class','level')
+				.append('polygon').attr('class',function(d,i){
+					// marcando a maior área do gráfico a fim de calcular área total
+					if(i == 0) return 'level base-level';
+					return 'level';
+				})
 				.attr('points', function(d){
 						//console.log(d);
 						var points = axes.getNonScaledPoints(d);
 						//console.log(points);
 						return points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
 				});
-
+				
 				var gAxes = back.selectAll('.axes').data(axes, function(d){return d.id;})
 				.enter();
 				// adicionando legenda dos eixos
@@ -107,10 +115,12 @@ function Radar(){
 				.attr('stroke',function(d,i){
 					return color[i];
 				})
-				.attr('opacity',function(d,i){
+				.attr('fill-opacity',function(d,i){
+					if(fill)
 					return opacity(i);
+					else return 0;
 				})
-				.attr('stroke-width',"1px")
+				.attr('stroke-width',"2px")
 				.attr("points", function(d){
 					
 					return d.points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
@@ -120,11 +130,11 @@ function Radar(){
 				var polygon = points.map(function(el){return [el.x, el.y];});
 				var center = d3.polygonCentroid(polygon);
 				var area = Math.round(d3.polygonArea(polygon)*100)/100;
-				
+				totalArea = totalArea === -1 ? calcArea(d3.select('.base-level')) : totalArea;
 				dataArea.selectAll('.centerpoint').data([center]).enter().append('text')
 				.attr('class','centerpoint')
 				.attr('x',function(d){return d[0];})
-				.attr('y',function(d){return d[1];}).text(area)
+				.attr('y',function(d){return d[1];}).text(porcentagem(area, totalArea)+"%")
 				.style('text-anchor','middle');
 				dataArea.selectAll('.points').data(points).enter().append('text')
 				.attr('class','points')
@@ -156,8 +166,6 @@ function Radar(){
 			polygons.merge(enterData).transition().duration(2000)
 			.attr('points',
 				function(d){
-					//var points = axes.getNonScaledPoints(d);
-					//console.log(points);
 					return d.points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
 				});
 
@@ -197,7 +205,20 @@ function Radar(){
 		console.log("teste");
 		return main;
 	}
+	// default = false
+	main.fill = function(_){
+		return arguments.length ? (fill=_, main) : margin;
+	}
 
 	return main;
 }
 
+function calcArea(d){
+	var a =  d3.polygonArea(d.attr('points').split(' ').map(function(el){return el.split(',').map(Number)}));
+	return (Math.round(a*100))/100;
+}
+
+function porcentagem(a,b){
+	console.log(a,b);
+	return Math.round((a/b) * 10000)/100;
+}
