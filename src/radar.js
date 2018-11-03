@@ -109,7 +109,7 @@ function Radar(){
 			
 			
 			var polygons = enterData.enter().append('polygon').attr('fill',function(d,i){
-					return color[i];
+					return 'none';//color[i];
 				})
 				.attr('class','entity')
 				.attr('stroke',function(d,i){
@@ -120,7 +120,7 @@ function Radar(){
 					return opacity(i);
 					else return 0;
 				})
-				.attr('stroke-width',"2px")
+				.attr('stroke-width',"4px")
 				.attr("points", function(d){
 					
 					return d.points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
@@ -138,8 +138,8 @@ function Radar(){
 				.style('text-anchor','middle');
 				dataArea.selectAll('.points').data(points).enter().append('text')
 				.attr('class','points')
-				.attr('x',function(d){return d.x;})
-				.attr('y',function(d){return d.y;})
+				.attr('x',function(d){ return d.x < radio ? d.x-5 : d.x + 5;})
+				.attr('y',function(d){return d.y < radio ? d.y-5 : d.y + 5;})
 				.classed('anchor-end', function(d){
 					//console.log(Math.round(d.apex.x));
 					if(Math.round(d.x) < radio)
@@ -219,6 +219,5 @@ function calcArea(d){
 }
 
 function porcentagem(a,b){
-	console.log(a,b);
-	return Math.round((a/b) * 10000)/100;
+	return Math.round((a/b) * 100);
 }
