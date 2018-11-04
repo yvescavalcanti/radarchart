@@ -46,6 +46,7 @@
 
 .points{
 	font-family: sans-serif;
+	font-size:0.85em;
 }
 </style>
 <script type="text/javascript" src="../node_modules/d3/dist/d3.min.js"></script>
@@ -85,20 +86,19 @@ var sample2 = [
 }
 
 ];
-var width=400, height=400;
-var raio = width < height ? width/2 : height / 2;
+var size=400;
 var margin = {left:50,top:50};
-
+var center = {x:((size/2)-margin.left), y:((size/2)-margin.top)};
 var labels = ["força", "velocidade", "resistência", "preço", "peso"];
 var axesFactory = radialAxes().labels(labels)
-	.keys(['forca','velocidade','resistencia','preco','peso']).radio(150);
+	.keys(['forca','velocidade','resistencia','preco','peso']).radio(120).center(center);
 
 var axes = axesFactory(sample2);
 
-var radar = Radar().radio(150).margin(margin).data(sample2).axes(axes).center({x:150,y:150});
+var radar = Radar().size(size).margin(margin).data(sample2).axes(axes);
 
 var r1 = d3.select("#chart").call(radar);
-
+/*
 labels = ["força", "velocidade", "preço"];
 var axesFactory2 = radialAxes().labels(labels)
 	.keys(['forca','velocidade','preco']).radio(150);

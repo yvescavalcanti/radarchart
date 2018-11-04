@@ -8,7 +8,8 @@ function Radar(){
 	var n_levels = 5;
 	var opacity = d3.scaleLinear().range([0.8,0.4]);
 	var dataArea, back;
-	var svg;
+	var svg, duration = 3500;
+	var size = 400;
 	// define se a área do radar deve ser preenchida
 	var fill = false;
 	// armazena área total
@@ -32,15 +33,34 @@ function Radar(){
 			
 			var el = d3.select(this);
 			if(svg === undefined)
-			svg = el.append('svg').attr('width',400)
-			.attr('height',400);
+			svg = el.append('svg').attr('width',size)
+			.attr('height',size);
+			var defs = svg.append("defs");
+
+			//Code taken from http://stackoverflow.com/questions/9630008/how-can-i-create-a-glow-around-a-rectangle-with-svg
+			//Filter for the outside glow
+			var filter = defs.append("filter")
+				.attr("id","glow");
+		
+			filter.append("feGaussianBlur")
+				.attr("class", "blur")
+				.attr("stdDeviation","4.5")
+				.attr("result","coloredBlur");
+		
+			var feMerge = filter.append("feMerge");
+			feMerge.append("feMergeNode")
+				.attr("in","coloredBlur");
+			feMerge.append("feMergeNode")
+				.attr("in","SourceGraphic");
+
 			if(back === undefined){
 				back = svg.append('g').attr('transform', function(d){
 					return "translate("+margin.left+","+margin.top+")";
 				});
 
 				back.selectAll('.level').data(levels).enter()
-				.append('polygon').attr('class',function(d,i){
+				.append('polygon')
+				.attr('class',function(d,i){
 					// marcando a maior área do gráfico a fim de calcular área total
 					if(i == 0) return 'level base-level';
 					return 'level';
@@ -48,7 +68,6 @@ function Radar(){
 				.attr('points', function(d){
 						//console.log(d);
 						var points = axes.getNonScaledPoints(d);
-						//console.log(points);
 						return points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
 				});
 				
@@ -57,10 +76,15 @@ function Radar(){
 				// adicionando legenda dos eixos
 				gAxes.append("text").attr("class","axis-text")
 				.text(function(d){return d.label;})
-				.attr('x', function(d){return d.apex.x;}).attr('y',function(d){return d.apex.y;})
+				.attr('x', function(d){
+					return d.apex.x<center.x ? d.apex.x - d.label.length : d.apex.x + d.label.length;
+				}).attr('y',function(d){
+					if ( d.apex.y < center.y ) return d.apex.y - 20;
+					return d.apex.y;
+				})
 				.classed('anchor-end', function(d){
-					//console.log(Math.round(d.apex.x));
-					if(Math.round(d.apex.x) < radio)
+	
+					if(Math.round(d.apex.x) < center.x)
 						return true;
 					else
 						return false;
@@ -68,7 +92,7 @@ function Radar(){
 				})
 				.classed('anchor-start', function(d){
 					//console.log(Math.round(d.apex.x));
-					if(Math.round(d.apex.x) > radio)
+					if(Math.round(d.apex.x) > center.x)
 						return true;
 					else
 						return false;
@@ -86,6 +110,7 @@ function Radar(){
 				.attr('fill','none').attr('class','axis')
 				.on("mouseover",function(d){
 					d3.select(this).classed("axis-hover", true);
+					
 				})
 				.on("mouseout",function(){
 					d3.select(this).classed("axis-hover", false);
@@ -125,21 +150,30 @@ function Radar(){
 					
 					return d.points.map(function(p){return [p.x, p.y].join(",");}).join(" ");
 			}).on("mouseenter",function(d){
-				var el = d3.select(this).attr('stroke','black');
+				var hover = this;
+				svg.selectAll('.entity').transition(duration).style('opacity', function(){
+				
+					return hover === this ? 1 : 0;
+				});
+				//var el = d3.select(this).attr('stroke','black');
 				var points = axes.getPoints(d);
 				var polygon = points.map(function(el){return [el.x, el.y];});
 				var center = d3.polygonCentroid(polygon);
 				var area = Math.round(d3.polygonArea(polygon)*100)/100;
 				totalArea = totalArea === -1 ? calcArea(d3.select('.base-level')) : totalArea;
-				dataArea.selectAll('.centerpoint').data([center]).enter().append('text')
+				dataArea.selectAll('.centerpoint').data([center]).enter()
+				.append('text')
 				.attr('class','centerpoint')
 				.attr('x',function(d){return d[0];})
 				.attr('y',function(d){return d[1];}).text(porcentagem(area, totalArea)+"%")
 				.style('text-anchor','middle');
-				dataArea.selectAll('.points').data(points).enter().append('text')
+				var dta = dataArea.selectAll('.points').data(points).enter();
+				
+				svg.selectAll('.axis-text').transition(duration).style('opacity',0.5);
+				dta.append('text')
 				.attr('class','points')
-				.attr('x',function(d){ return d.x < radio ? d.x-5 : d.x + 5;})
-				.attr('y',function(d){return d.y < radio ? d.y-5 : d.y + 5;})
+				.attr('x',function(d){ return d.x < main.center().x ? d.x-20 : d.x + 20;})
+				.attr('y',function(d){return d.y < main.center().y ? d.y-20 : d.y + 20;})
 				.classed('anchor-end', function(d){
 					//console.log(Math.round(d.apex.x));
 					if(Math.round(d.x) < radio)
@@ -156,12 +190,16 @@ function Radar(){
 						return false;
 					
 				})
-				.text(function(d){return d.value;});
+				.text(function(d){return d.value;}).style('filter','url(#glow)');
 			})
 			.on("mouseout",function(d,i){
+				var hover = this;
+				svg.selectAll('.entity').transition(duration).style('opacity', 1);
 				d3.select(this).attr('stroke',color[i]);
 				dataArea.selectAll('.points').remove();
 				dataArea.selectAll('.centerpoint').remove();
+				svg.selectAll('.axis-text').transition(duration).style('opacity',1);
+				
 			});
 			polygons.merge(enterData).transition().duration(2000)
 			.attr('points',
@@ -173,8 +211,15 @@ function Radar(){
 		
 	}
 
+
+
 	main.axes = function(_){
-		return arguments.length ? (axes=_, main) : axes;
+		if(arguments.length){
+			axes = _.axes;
+			center = _.center;
+			radio = _.radio;
+			return main;
+		}else return axes;
 	};
 
 	main.center = function(_){
@@ -201,8 +246,8 @@ function Radar(){
 		return main;
 	}
 
-	main.teste = function(){
-		console.log("teste");
+	main.size = function(_){
+		return arguments.length ? ( size=_, main ) : size;
 		return main;
 	}
 	// default = false

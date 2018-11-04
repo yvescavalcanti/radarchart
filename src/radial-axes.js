@@ -67,6 +67,7 @@ function radialAxes(){
 	var keys = [];
 	var labels = [];
 	var radio = 0;
+	var center = {};
 	var step = 0;
 	var x,y;
 	var axes = [];
@@ -88,26 +89,30 @@ function radialAxes(){
 				angle: aux,
 				// localização do extremo do eixo
 				apex:{
-					x:x(radio, aux),
-					y:y(radio, aux)
+					x:x(radio, aux)+Math.abs(center.x-radio),
+					y:y(radio, aux)+Math.abs(center.y-radio)
 				},
 				label : labels[i],
 				// função para posicionar pontos ao longo do eixo
 				getPoint:function(d)
 					{
-						//return (polarToCartesian(radio,this.angle,scale))(d[k]);
-						var p = (polarToCartesian(radio,this.angle,scale))(d[k].scaled);
+						
+						//determinar centro dos poligonos de dados
+						var p = (polarToCartesian(center.x,this.angle,scale))(d[k].scaled);
 						p.value = d[k].value;
 						return p;
 					},
+					// determinar centro dos poligonos do fundo
 				getNonScaledPoint:function(d){
-					return (polarToCartesian(radio,this.angle))(d[k]);
+					return (polarToCartesian(center.x,this.angle))(d[k]);
 				}
 			});
 			// calcula ângulo do próximo eixo
 			aux+=step;
 			
 		});
+
+		
 
 		axes.apex = function(){
 			return this.map(function(a){
@@ -140,7 +145,7 @@ function radialAxes(){
 			return p;
 		}
 	
-		return axes;
+		return {axes:axes, center: center, radio: radio};
 	}
 
 	main.keys = function(_){
@@ -157,8 +162,8 @@ function radialAxes(){
 		else return radio;
 	};
 
-	main.axes = function(){
-			
+	main.center = function(_){
+		return arguments.length ? (center = _, main) : center;
 	};
 
 	main.labels = function(_){
