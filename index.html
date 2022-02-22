@@ -1,10 +1,37 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Radarchart - Yves Cavalcanti</title>
-    <script type="text/javascript" src="./src/radar.js"/>
+    <title>Radarchart</title>
+    <link rel="preload" href="https://fonts.googleapis.com">
+<link rel="preload" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="./src/radar.js" ></script>
+    <style>
+      header{
+        display: flex;
+        height: 150px;
+        background-color: gray;
+        justify-content:space-around;
+        align-items: center;
+      }
+      
+      
+      .title{
+        font-size: 3em;
+        text-align: center;
+        color:white;
+        font-family: 'Roboto Condensed', sans-serif;
+      }
+    </style>
   </head>
   <body>
-    <h1>RadarChart</h1>
+    <header>
+      <div class="title">RADARCHART</div>
+    </header>
+    
+    <p>
+      É uma forma multidimensional de apresentar 3 ou mais variáveis quantitativas.
+      A área do polígono formado pode ser utilizado para comparar diferentes entidades plotadas.
+    </p>
   </body>
 </html>
